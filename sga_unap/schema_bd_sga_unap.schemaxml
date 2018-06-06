@@ -1,0 +1,242 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemadesigner version="6.5">
+<source>
+<database charset="utf8" collation="utf8_general_ci">sga_unap</database>
+</source>
+<canvas zoom="80">
+<tables>
+<table name="escuela" view="colnames">
+<left>509</left>
+<top>363</top>
+<width>110</width>
+<height>171</height>
+<sql_create_table>CREATE TABLE `escuela` (
+  `Esc_IdEscuela` int(11) NOT NULL AUTO_INCREMENT,
+  `Esc_Nombre` varchar(200) DEFAULT NULL,
+  `Esc_Descripcion` varchar(250) DEFAULT NULL,
+  `Esc_Direccion` varchar(250) DEFAULT NULL,
+  `Esc_Telefono` varchar(45) DEFAULT NULL,
+  `Fac_IdFacultad` int(11) NOT NULL,
+  `Esc_Estado` tinyint(1) DEFAULT NULL,
+  `Row_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Esc_IdEscuela`),
+  KEY `Fk_escuela_facultad_idx` (`Fac_IdFacultad`),
+  CONSTRAINT `Fk_escuela_facultad` FOREIGN KEY (`Fac_IdFacultad`) REFERENCES `facultad` (`Fac_IdFacultad`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="curso" view="colnames">
+<left>6</left>
+<top>198</top>
+<width>133</width>
+<height>211</height>
+<sql_create_table>CREATE TABLE `curso` (
+  `Cur_IdCurso` int(11) NOT NULL AUTO_INCREMENT,
+  `Cur_Nombre` varchar(250) DEFAULT NULL,
+  `Cur_Codigo` varchar(250) DEFAULT NULL,
+  `Cur_Creditos` int(11) DEFAULT NULL,
+  `Cur_HorasTeoria` int(11) DEFAULT NULL,
+  `Cur_HorasPractica` int(11) DEFAULT NULL,
+  `Cur_Semanas` int(11) DEFAULT NULL,
+  `Cur_Ciclo` int(11) DEFAULT NULL,
+  `Cur_Tipo` varchar(100) NOT NULL,
+  `Ciu_IdCicloCurricula` int(11) DEFAULT NULL,
+  `Cur_Estado` int(1) NOT NULL,
+  `Row_Estado` int(1) DEFAULT NULL,
+  PRIMARY KEY (`Cur_IdCurso`),
+  KEY `fk_curso_curricula` (`Ciu_IdCicloCurricula`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="curso_requisito" view="colnames">
+<left>191</left>
+<top>238</top>
+<width>167</width>
+<height>90</height>
+<sql_create_table>CREATE TABLE `curso_requisito` (
+  `Cue_IdPrincipal` int(11) DEFAULT NULL,
+  `Cue_IdRequisito` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="curricula" view="colnames">
+<left>352</left>
+<top>367</top>
+<width>110</width>
+<height>171</height>
+<sql_create_table>CREATE TABLE `curricula` (
+  `Cui_IdCurricula` int(11) NOT NULL AUTO_INCREMENT,
+  `Cui_Nombre` varchar(250) DEFAULT NULL,
+  `Cui_Descripcion` longtext,
+  `Cui_Codigo` varchar(50) DEFAULT NULL,
+  `Cui_Resolucion` varchar(250) DEFAULT NULL,
+  `Esc_IdEscuela` int(11) DEFAULT NULL,
+  `Cui_Estado` tinyint(1) DEFAULT NULL,
+  `Row_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Cui_IdCurricula`),
+  KEY `FK_curricula_escuela` (`Esc_IdEscuela`),
+  CONSTRAINT `FK_curricula_escuela` FOREIGN KEY (`Esc_IdEscuela`) REFERENCES `escuela` (`Esc_IdEscuela`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="carga_academica" view="colnames">
+<left>204</left>
+<top>23</top>
+<width>147</width>
+<height>177</height>
+<sql_create_table>CREATE TABLE `carga_academica` (
+  `Caa_IdCargaAcademica` int(11) NOT NULL AUTO_INCREMENT,
+  `Caa_Grupo` int(11) DEFAULT NULL,
+  `Caa_Tipo` varchar(20) DEFAULT NULL,
+  `Caa_Vacantes` int(11) DEFAULT NULL,
+  `Cur_IdCurso` int(11) NOT NULL,
+  `Sem_IdSemestre` int(11) DEFAULT NULL,
+  `Usr_IdUsuarioRol` int(11) DEFAULT NULL,
+  `Caa_Estado` tinyint(1) DEFAULT NULL,
+  `Row_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Caa_IdCargaAcademica`),
+  KEY `fk_carga_academica_curso_idx` (`Cur_IdCurso`),
+  KEY `FK_carga_academica_semestre` (`Sem_IdSemestre`),
+  KEY `FK_carga_academica_usuario_rol` (`Usr_IdUsuarioRol`),
+  CONSTRAINT `FK_carga_academica_curso` FOREIGN KEY (`Cur_IdCurso`) REFERENCES `curso` (`Cur_IdCurso`),
+  CONSTRAINT `FK_carga_academica_semestre` FOREIGN KEY (`Sem_IdSemestre`) REFERENCES `semestre` (`Sem_IdSemestre`),
+  CONSTRAINT `FK_carga_academica_usuario_rol` FOREIGN KEY (`Usr_IdUsuarioRol`) REFERENCES `usuario_rol` (`Usr_IdUsuarioRol`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="horario" view="colnames">
+<left>612</left>
+<top>122</top>
+<width>116</width>
+<height>144</height>
+<sql_create_table>CREATE TABLE `horario` (
+  `Hor_IdHorario` int(11) NOT NULL AUTO_INCREMENT,
+  `Hor_Inicio` time DEFAULT NULL,
+  `Hor_Final` time DEFAULT NULL,
+  `Hor_Tipo` varchar(45) DEFAULT NULL,
+  `Hor_Dia` varchar(45) DEFAULT NULL,
+  `Amb_IdAmbiente` int(11) NOT NULL,
+  PRIMARY KEY (`Hor_IdHorario`),
+  KEY `fk_horario_ambiente_idx` (`Amb_IdAmbiente`),
+  CONSTRAINT `fk_horario_ambiente` FOREIGN KEY (`Amb_IdAmbiente`) REFERENCES `ambiente` (`Amb_IdAmbiente`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="usuario_rol" view="colnames">
+<left>18</left>
+<top>14</top>
+<width>116</width>
+<height>117</height>
+<sql_create_table>CREATE TABLE `usuario_rol` (
+  `Usr_IdUsuarioRol` int(11) NOT NULL AUTO_INCREMENT,
+  `Usu_IdUsuario` int(11) NOT NULL,
+  `Rol_IdRol` int(11) NOT NULL,
+  `Usr_Valor` int(3) DEFAULT NULL,
+  PRIMARY KEY (`Usr_IdUsuarioRol`,`Usu_IdUsuario`,`Rol_IdRol`),
+  KEY `FK_usuario_rol_rol` (`Rol_IdRol`),
+  KEY `FK_usuario_rol_usuario` (`Usu_IdUsuario`),
+  CONSTRAINT `FK_usuario_rol_rol` FOREIGN KEY (`Rol_IdRol`) REFERENCES `rol` (`Rol_IdRol`),
+  CONSTRAINT `FK_usuario_rol_usuario` FOREIGN KEY (`Usu_IdUsuario`) REFERENCES `usuario` (`Usu_IdUsuario`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="semestre" view="colnames">
+<left>414</left>
+<top>99</top>
+<width>116</width>
+<height>132</height>
+<sql_create_table>CREATE TABLE `semestre` (
+  `Sem_IdSemestre` int(11) NOT NULL AUTO_INCREMENT,
+  `Sem_Numero` int(11) DEFAULT NULL,
+  `Sem_Ano` year(4) DEFAULT NULL,
+  `Sem_Activo` tinyint(1) DEFAULT NULL,
+  `Sem_Inicio` datetime DEFAULT NULL,
+  `Sem_fin` datetime DEFAULT NULL,
+  PRIMARY KEY (`Sem_IdSemestre`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="carga_academica_horario" view="colnames">
+<left>402</left>
+<top>9</top>
+<width>180</width>
+<height>76</height>
+<sql_create_table>CREATE TABLE `carga_academica_horario` (
+  `Caa_IdCargaAcademica` int(11) NOT NULL,
+  `Hor_IdHorario` int(11) NOT NULL,
+  KEY `FK_carga_academica_horario_carga` (`Caa_IdCargaAcademica`),
+  KEY `FK_carga_academica_horario_horario` (`Hor_IdHorario`),
+  CONSTRAINT `FK_carga_academica_horario_carga` FOREIGN KEY (`Caa_IdCargaAcademica`) REFERENCES `carga_academica` (`Caa_IdCargaAcademica`),
+  CONSTRAINT `FK_carga_academica_horario_horario` FOREIGN KEY (`Hor_IdHorario`) REFERENCES `horario` (`Hor_IdHorario`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="ambiente" view="colnames">
+<left>756</left>
+<top>16</top>
+<width>116</width>
+<height>130</height>
+<sql_create_table>CREATE TABLE `ambiente` (
+  `Amb_IdAmbiente` int(11) NOT NULL AUTO_INCREMENT,
+  `Amb_Nombre` varchar(45) DEFAULT NULL,
+  `Amb_Direccion` varchar(45) DEFAULT NULL,
+  `Amb_Telefono` varchar(45) DEFAULT NULL,
+  `Tip_IdTipoAmbiente` int(11) NOT NULL,
+  PRIMARY KEY (`Amb_IdAmbiente`),
+  KEY `fk_ambiente_tipo_idx` (`Tip_IdTipoAmbiente`),
+  CONSTRAINT `fk_ambiente_tipo` FOREIGN KEY (`Tip_IdTipoAmbiente`) REFERENCES `tipo_ambiente` (`Tia_IdTipoAmbiente`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="ciclo" view="colnames">
+<left>45</left>
+<top>418</top>
+<width>93</width>
+<height>119</height>
+<sql_create_table>CREATE TABLE `ciclo` (
+  `Cic_IdCiclo` int(11) NOT NULL AUTO_INCREMENT,
+  `Cic_Nombre` varchar(150) NOT NULL,
+  `Cic_Numero` int(11) NOT NULL,
+  `Cic_Estado` tinyint(1) DEFAULT NULL,
+  `Row_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Cic_IdCiclo`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="ciclo_curricula" view="colnames">
+<left>178</left>
+<top>364</top>
+<width>131</width>
+<height>117</height>
+<sql_create_table>CREATE TABLE `ciclo_curricula` (
+  `Ciu_IdCicloCurricula` int(11) NOT NULL AUTO_INCREMENT,
+  `Cic_IdCiclo` int(11) NOT NULL,
+  `Cui_IdCurricula` int(11) NOT NULL,
+  `Ciu_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Ciu_IdCicloCurricula`),
+  KEY `FK_ciclo_curricula_ciclo` (`Cic_IdCiclo`),
+  KEY `FK_ciclo_curricula_curricula` (`Cui_IdCurricula`),
+  CONSTRAINT `FK_ciclo_curricula_ciclo` FOREIGN KEY (`Cic_IdCiclo`) REFERENCES `ciclo` (`Cic_IdCiclo`),
+  CONSTRAINT `FK_ciclo_curricula_curricula` FOREIGN KEY (`Cui_IdCurricula`) REFERENCES `curricula` (`Cui_IdCurricula`),
+  CONSTRAINT `FK_ciclo_curricula_curso` FOREIGN KEY (`Ciu_IdCicloCurricula`) REFERENCES `curso` (`Ciu_IdCicloCurricula`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="facultad" view="colnames">
+<left>667</left>
+<top>371</top>
+<width>105</width>
+<height>144</height>
+<sql_create_table>CREATE TABLE `facultad` (
+  `Fac_IdFacultad` int(11) NOT NULL AUTO_INCREMENT,
+  `Fac_Nombre` varchar(150) DEFAULT NULL,
+  `Fac_Direccion` varchar(200) DEFAULT NULL,
+  `Fac_Telefono` varchar(100) DEFAULT NULL,
+  `Fac_Estado` tinyint(1) DEFAULT NULL,
+  `Row_Estado` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`Fac_IdFacultad`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+<table name="tipo_ambiente" view="colnames">
+<left>905</left>
+<top>25</top>
+<width>128</width>
+<height>103</height>
+<sql_create_table>CREATE TABLE `tipo_ambiente` (
+  `Tia_IdTipoAmbiente` int(11) NOT NULL AUTO_INCREMENT,
+  `Tia_Nombre` varchar(45) DEFAULT NULL,
+  `Tia_Descripcion` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`Tia_IdTipoAmbiente`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8</sql_create_table>
+</table>
+</tables>
+</canvas>
+</schemadesigner>

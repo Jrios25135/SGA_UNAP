@@ -1,0 +1,173 @@
+ARCHIVO JS==========
+====================================================================
+$(document).on('ready', function () {  
+    
+    $('body').on('click', '.pagina', function () {
+        $("#cargando").show();
+        paginacion($(this).attr("pagina"), $(this).attr("nombre"), $(this).attr("parametros"));
+    });
+    var paginacion = function (pagina, nombrelista, datos) {
+        var pagina = 'pagina=' + pagina;
+
+        $.post(_root_ + 'lotes/coleccion/_paginacion_' + nombrelista + '/' + datos, pagina, function (data) {
+            $("#" + nombrelista).html('');
+            $("#cargando").hide();
+            $("#" + nombrelista).html(data);
+        });
+    }
+    
+    $("body").on('change', "#Oro_IdOrdenOrganismo", function () {        
+        actualizarFamilia($("#Oro_IdOrdenOrganismo").val());
+    });
+    $("body").on('change', "#Fao_IdFamiliaOrganismo", function () {        
+        actualizarGenero($("#Fao_IdFamiliaOrganismo").val());
+    });
+    $("body").on('change', "#Geo_IdGeneroOrganismo", function () {        
+        actualizarEspecie($("#Geo_IdGeneroOrganismo").val());
+    });
+    
+});
+
+function actualizarFamilia(Oro_IdOrdenOrganismo) {
+    $("#cargando").show();
+    $.post(_root_ + 'lotes/coleccion/actualizaFamilia',
+    {
+        Oro_IdOrdenOrganismo:Oro_IdOrdenOrganismo
+        
+    }, function (data) {
+        $("#Fao_IdFamiliaOrganismo").html('');
+        $("#Geo_IdGeneroOrganismo").html('');
+        $("#Eso_IdEspecieOrganismo").html('');
+        $("#cargando").hide();
+        $("#Fao_IdFamiliaOrganismo").html(data);
+        $("#Geo_IdGeneroOrganismo").html('<option value="0">Seleccione</option>');
+        $("#Eso_IdEspecieOrganismo").html('<option value="0">Seleccione</option>');
+    });
+}
+
+function actualizarGenero(Fao_IdFamiliaOrganismo) {
+    $("#cargando").show();
+    $.post(_root_ + 'lotes/coleccion/actualizaGenero',
+    {
+        Fao_IdFamiliaOrganismo:Fao_IdFamiliaOrganismo
+        
+    }, function (data) {
+        $("#Geo_IdGeneroOrganismo").html('');
+        $("#Eso_IdEspecieOrganismo").html('');
+        $("#cargando").hide();        
+        $("#Geo_IdGeneroOrganismo").html(data);
+        $("#Eso_IdEspecieOrganismo").html('<option value="0">Seleccione</option>');
+    });
+}
+
+function actualizarEspecie(Geo_IdGeneroOrganismo) {
+    $("#cargando").show();
+    $.post(_root_ + 'lotes/coleccion/actualizaEspecie',
+    {
+        Geo_IdGeneroOrganismo:Geo_IdGeneroOrganismo
+        
+    }, function (data) {
+        $("#Eso_IdEspecieOrganismo").html('');
+        $("#cargando").hide();
+        $("#Eso_IdEspecieOrganismo").html(data);
+    });
+}
+
+
+ARCHIVO AJAX
+========================================================
+<option value="0">Seleccione</option>
+{if isset($especies) && count($especies)}
+{foreach item=e from=$especies}
+<option value="{$e.Eso_IdEspecieOrganismo|default:0}" >{$e.Eso_NombreCientifico|default:"Seleccionar"}</option>
+{/foreach} 
+{/if}
+
+
+
+ARCHIVO VIEW.TPL
+========================================================
+<label class="col-md-4 "><b>Familia :</b> </label>
+                        <div class="col-md-8">
+                            <select class="form-control" name ="Fao_IdFamiliaOrganismo" id = "Fao_IdFamiliaOrganismo">
+                                <option value="0">Seleccione</option>
+                                {if isset($familias) && count($familias)}
+                                {foreach item=f from=$familias}
+                                <option value="{$f.Fao_IdFamiliaOrganismo|default:0}" >{$f.Fao_Nombre|default:"Seleccionar"}</option>
+                                {/foreach} 
+                                {/if}
+                            </select>
+                        </div>
+                        </td>
+
+CONTROLADOR
+==================================================================================
+public function actualizaFamilia(){
+        $Oro_IdOrdenOrganismo = $this->getInt('Oro_IdOrdenOrganismo');
+         
+        $condicion = " WHERE Fao_Estado = 1 AND Oro_IdOrdenOrganismo = $Oro_IdOrdenOrganismo";
+        $this->_view->assign('familias', $this->_coleccion->getFamiliasOrganismo($condicion));
+                
+        $this->_view->renderizar('ajax/Fao_IdFamiliaOrganismo', false, true);
+    }
+
+    public function actualizaGenero(){
+        $Fao_IdFamiliaOrganismo = $this->getInt('Fao_IdFamiliaOrganismo');
+         
+        $condicion = " WHERE Geo_Estado = 1 AND Fao_IdFamiliaOrganismo = $Fao_IdFamiliaOrganismo";
+        $this->_view->assign('generos', $this->_coleccion->getGenerosOrganismo($condicion));
+                
+        $this->_view->renderizar('ajax/Geo_IdGeneroOrganismo', false, true);
+    }
+
+    public function actualizaEspecie(){
+        $Geo_IdGeneroOrganismo = $this->getInt('Geo_IdGeneroOrganismo');
+         
+        $condicion = " WHERE Eso_Estado = 1 AND Geo_IdGeneroOrganismo = $Geo_IdGeneroOrganismo ";
+        $this->_view->assign('especies', $this->_coleccion->getEspeciesOrganismo($condicion));
+                
+        $this->_view->renderizar('ajax/Eso_IdEspecieOrganismo', false, true);
+    }
+
+
+
+MODEL
+============================================================================================
+public function getFamiliasOrganismo($condicion = '')
+    {
+        try {
+            
+            $result = $this->_db->query(
+             "  SELECT * FROM familia_organismo " . $condicion
+            );
+            return $result->fetchAll();
+        } catch (PDOException $exception) {
+            $this->registrarBitacora("lotes(coleccionModel)", "getFamiliasOrganismo", "Error Model", $exception);
+            return $exception->getTraceAsString();
+        }
+    }
+    public function getGenerosOrganismo($condicion = '')
+    {
+        try {
+            
+            $result = $this->_db->query(
+             "  SELECT * FROM genero_organismo " . $condicion
+            );
+            return $result->fetchAll();
+        } catch (PDOException $exception) {
+            $this->registrarBitacora("lotes(coleccionModel)", "getGenerosOrganismo", "Error Model", $exception);
+            return $exception->getTraceAsString();
+        }
+    }
+    public function getEspeciesOrganismo($condicion = '')
+    {
+        try {
+            $result = $this->_db->query(
+             "  SELECT * FROM especie_organismo " . $condicion
+            );
+            return $result->fetchAll();
+        } catch (PDOException $exception) {
+            $this->registrarBitacora("lotes(coleccionModel)", "getEspeciesOrganismo", "Error Model", $exception);
+            return $exception->getTraceAsString();
+        }
+    }
